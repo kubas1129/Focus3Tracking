@@ -1,0 +1,102 @@
+// Copyright (c) 2022 HTC Corporation. All Rights Reserved.
+
+
+#include "FT_Framework.h"
+
+FT_Framework* FT_Framework::m_Framework = nullptr;
+
+FT_Framework::FT_Framework()
+{
+}
+
+FT_Framework::~FT_Framework()
+{
+}
+
+FT_Framework* FT_Framework::Instance()
+{
+  if (m_Framework == nullptr) {
+    m_Framework = new FT_Framework();
+  }
+  return m_Framework;
+}
+
+void FT_Framework::DestroyFramework()
+{
+  if (m_Framework != nullptr) {
+    delete m_Framework;
+    m_Framework = nullptr;
+  }
+}
+
+int FT_Framework::StartEyeFramework()
+{
+  if (m_EyeStatus == FrameworkStatus::WORKING) {
+    UE_LOG(LogTemp, Log, TEXT("[FT_Eye] Framework is already running."));
+    return m_EyeStatus;
+  }
+
+  m_EyeStatus = FrameworkStatus::START;
+  bool isInit = false;
+  isInit = UViveOpenXRFacialTrackingFunctionLibrary::CreateFacialTracker(EXrFacialTrackingType::Eye);
+  if (isInit)
+  {
+    m_EyeStatus = FrameworkStatus::WORKING;
+    UE_LOG(LogTemp, Log, TEXT("[FT_Eye] CreateFacialTracker."));
+  }
+  else
+  {
+    m_EyeStatus = FrameworkStatus::ERROR;
+    UE_LOG(LogTemp, Log, TEXT("[FT_Eye] CreateFacialTracker failed."));
+  }
+
+  return m_EyeStatus;
+}
+
+int FT_Framework::StartLipFramework()
+{
+  if (m_LipStatus == FrameworkStatus::WORKING) {
+    UE_LOG(LogTemp, Log, TEXT("[FT_Lip] Framework is already running."));
+    return m_LipStatus;
+  }
+
+  m_LipStatus = FrameworkStatus::START;
+
+  bool isInit = false;
+  isInit = UViveOpenXRFacialTrackingFunctionLibrary::CreateFacialTracker(EXrFacialTrackingType::Lip);
+  if (isInit)
+  {
+    m_LipStatus = FrameworkStatus::WORKING;
+    UE_LOG(LogTemp, Log, TEXT("[FT_Lip] CreateFacialTracker."));
+  }
+  else
+  {
+    m_LipStatus = FrameworkStatus::ERROR;
+    UE_LOG(LogTemp, Log, TEXT("[FT_Lip] CreateFacialTracker failed."));
+  }
+
+  return m_LipStatus;
+}
+
+int FT_Framework::StopAllFramework()
+{
+  if (m_EyeStatus != FrameworkStatus::NOT_SUPPORT && m_LipStatus != FrameworkStatus::NOT_SUPPORT)
+  {
+    if (m_EyeStatus != FrameworkStatus::STOP || m_LipStatus != FrameworkStatus::STOP)
+    {
+      bool isDestroyed = false;
+      isDestroyed = UViveOpenXRFacialTrackingFunctionLibrary::DestroyFacialTracker();
+      if (isDestroyed)
+      {
+        UE_LOG(LogTemp, Log, TEXT("[FT_Both] DestroyFacialTracker."));
+      }
+    }
+    else
+    {
+      UE_LOG(LogTemp, Log, TEXT("[FT_Both] Stop Framework : module not on."));
+    }
+  }
+  m_EyeStatus = FrameworkStatus::STOP;
+  m_LipStatus = FrameworkStatus::STOP;
+  return m_EyeStatus;
+}

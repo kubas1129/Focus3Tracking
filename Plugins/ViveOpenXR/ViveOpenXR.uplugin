@@ -1,0 +1,73 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.5.0",
+	"FriendlyName": "Vive Wave OpenXR - Windows",
+	"Description": "Features of VIVE OpenXR.",
+	"Category": "Virtual Reality",
+	"CreatedBy": "HTC Corporation",
+	"CreatedByURL": "https://developer.vive.com/",
+	"DocsURL": "https://developer.vive.com/resources/openxr/openxr-pcvr/documentation/",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EngineVersion": "5.0.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"SupportedTargetPlatforms": [
+		"Win64"
+	],
+	"Modules": [
+		{
+			"Name": "ViveOpenXRSceneUnderstanding",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ViveOpenXRFacialTracking",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ViveOpenXRRuntimeSettings",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ViveOpenXREditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ViveOpenXRCosmosController",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		},
+		{
+			"Name": "ViveOpenXRFocus3Controller",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "OpenXR",
+			"Enabled": true
+		},
+		{
+			"Name": "LiveLink",
+			"Enabled": true
+		}
+	]
+}

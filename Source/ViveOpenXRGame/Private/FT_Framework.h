@@ -1,0 +1,48 @@
+// Copyright (c) 2022 HTC Corporation. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "ViveFacialExpressionEnums.h"									// Get facial experssion enums from ViveOpenXR plugin.
+#include "ViveOpenXRFacialTrackingFunctionLibrary.h"		// These provide the functionality required for ViveOpenXR plugin - Facial Tracking.
+
+/**
+ * 
+ */
+class FT_Framework
+{
+public:
+
+	/** Constructor */
+	FT_Framework();
+	~FT_Framework();
+
+	/** Status for checking Facial Tracking.*/
+	enum FrameworkStatus {
+		STOP,
+		START,
+		WORKING,
+		ERROR,
+		NOT_SUPPORT,
+	};
+
+	/** Get an instance of FT_Framework class or create an instance if FT_Framework class instance not exist. */
+	static FT_Framework* Instance();
+
+	/** Delete instance of FT_Framework class. */
+	static void DestroyFramework();
+
+	/** This function will call CreateFacialTracker(Eye) from ViveOpenXR plugin to handle initial eye tracker. */
+	int StartEyeFramework();
+	/** This function will call CreateFacialTracker(Lip) from ViveOpenXR plugin to handle initial eye tracker. */
+	int StartLipFramework();
+	/** This function will call DestroyFacialTracker() from ViveOpenXR plugin to handle release all facial tracker. */
+	int StopAllFramework();
+
+private:
+	FrameworkStatus m_EyeStatus = FrameworkStatus::STOP;
+	FrameworkStatus m_LipStatus = FrameworkStatus::STOP;
+
+	/** m_Framework will hold the instance of FT_Framework class after call Instance(). */
+	static FT_Framework* m_Framework;
+};

@@ -1,0 +1,117 @@
+// Copyright (c) 2022 HTC Corporation. All Rights Reserved.
+
+#include "ViveOpenXR.h"
+#include "OpenXRCommon.h"
+#include "Engine/EngineTypes.h"
+#include "SceneUnderstanding.h"
+#include "FacialTracking.h"
+
+#define LOCTEXT_NAMESPACE "FViveOpenXRModule"
+DEFINE_LOG_CATEGORY(LogViveOpenXR);
+
+namespace ViveOpenXR
+{
+	static class FViveOpenXRModule* g_ViveOpenXRModule;
+
+	class FViveOpenXRModule : public IModuleInterface
+	{
+	public:
+		FSceneUnderstanding SceneUnderstanding;
+		FFacialTracking FacialTracking;
+
+		/** IModuleInterface implementation */
+		void StartupModule() override
+		{
+			SceneUnderstanding.Register();
+			FacialTracking.Register();
+			g_ViveOpenXRModule = this;
+		}
+
+		void ShutdownModule() override
+		{
+			g_ViveOpenXRModule = nullptr;
+			SceneUnderstanding.Unregister();
+			FacialTracking.Unregister();
+		}
+	};
+}// namespace ViveOpenXR
+
+void UViveOpenXRFunctionLibrary::GetIsSceneUnderstandingEnabled(bool& result)
+{
+	result = ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.m_bEnableSceneUnderstanding;
+}
+
+void UViveOpenXRFunctionLibrary::SetSceneComputeSphereBound(FVector center, float radius)
+{
+	ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.SetSceneComputeSphereBound(ToXrVector(center), radius);
+}
+
+void UViveOpenXRFunctionLibrary::SetSceneComputeOrientedBoxBound(FRotator rotator, FVector position, FVector extents)
+{
+	FRotationConversionCache rotationConver;
+	FQuat orientation = rotationConver.RotatorToQuat(rotator);
+	XrVector3f xrVectorExt;
+	xrVectorExt.x = extents.X;
+	xrVectorExt.y = extents.Y;
+	xrVectorExt.z = extents.Z;
+	ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.SetSceneComputeOrientedBoxBound(ToXrQuat(orientation), ToXrVector(position), xrVectorExt);
+}
+
+void UViveOpenXRFunctionLibrary::SetSceneComputeFrustumBound(FRotator rotator, FVector position, float angleUp, float angleDown, float angleRight, float angleLeft, float farDistance)
+{
+	FRotationConversionCache rotationConver;
+	FQuat orientation = rotationConver.RotatorToQuat(rotator);
+	ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.SetSceneComputeFrustumBound(ToXrQuat(orientation), ToXrVector(position), angleUp, angleDown, angleRight, angleLeft, farDistance);
+}
+
+void UViveOpenXRFunctionLibrary::ClearSceneComputeBounds(EXrBoundType type)
+{
+	ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.ClearSceneComputeBounds((ViveOpenXR::EXrSceneBoundType)type);
+}
+
+void UViveOpenXRFunctionLibrary::SetSceneComputeConsistency(EXrSceneComputeConsistency consistency)
+{
+	ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.SetSceneComputeConsistency((XrSceneComputeConsistencyMSFT)consistency);
+}
+
+void UViveOpenXRFunctionLibrary::SetMeshComputeLod(EXrMeshComputeLod lod)
+{
+	ViveOpenXR::g_ViveOpenXRModule->SceneUnderstanding.SetMeshComputeLod((XrMeshComputeLodMSFT)lod);
+}
+
+void UViveOpenXRFunctionLibrary::OpenPassThroughEXE(FString path, FString param)
+{
+	FProcHandle currHandle = FPlatformProcess::CreateProc(*path, *param, true, false, false, nullptr, 0, nullptr, nullptr);
+}
+
+void UViveOpenXRFunctionLibrary::GetIsFacialTrackingEnabled(bool& result)
+{
+	result = ViveOpenXR::g_ViveOpenXRModule->FacialTracking.m_bEnableFacialTracking;
+}
+
+bool UViveOpenXRFunctionLibrary::CreateFacialTracker(EXrFacialTrackingType trackingType)
+{
+	XrFacialTrackingTypeHTC trackType = static_cast<XrFacialTrackingTypeHTC>(trackingType);
+	bool res = ViveOpenXR::g_ViveOpenXRModule->FacialTracking.CreateFacialTracker(trackType);
+	return res;
+}
+
+bool UViveOpenXRFunctionLibrary::DestroyFacialTracker()
+{
+	return ViveOpenXR::g_ViveOpenXRModule->FacialTracking.DestroyFacialTracker();
+}
+
+bool UViveOpenXRFunctionLibrary::GetEyeFacialExpressions(bool& isActive, TMap<EEyeShape, float>& blendshapes)
+{
+	return ViveOpenXR::g_ViveOpenXRModule->FacialTracking.GetEyeExpressions(isActive, blendshapes);
+}
+
+bool UViveOpenXRFunctionLibrary::GetLipFacialExpressions(bool& isActive, TMap<ELipShape, float>& blendshapes)
+{
+	return ViveOpenXR::g_ViveOpenXRModule->FacialTracking.GetLipExpressions(isActive, blendshapes);
+}
+
+#undef LOCTEXT_NAMESPACE
+	
+IMPLEMENT_MODULE(ViveOpenXR::FViveOpenXRModule, ViveOpenXR)
+
